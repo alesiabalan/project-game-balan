@@ -1,143 +1,81 @@
-let game = {
-    canvas: null,
-    ctx: null,
-    board: null,
-    width: 0,
-    height: 0,
-    score: 0,
-    dimensions: {
-      max: {
-        width: 640,
-        height: 360
-      },
-      min: {
-        width: 300,
-        height: 300
-      }
-    },
-    sprites: {
-      background: null,
-      cell: null,
-      head: null,
-      body: null,
-      food: null,
-      bomb: null
-    },
-    start() {
-      this.init();
-      this.preload(() => {
-        this.run();
-      });
-    },
-    init() {
-      this.canvas = document.getElementById('mycanvas');
-      this.ctx = this.canvas.getContext('2d');
-      this.initDimensions();
-      this.setTextFont();
-    },
-    setTextFont() {
-      
-    },
-    preload(callback) {
-      let loaded = 0;
-      let required = Object.keys(this.sprites).length;
-  
-      let onAssetLoad = () => {
-        ++loaded;
-        console.log(loaded);
-  
-        if (loaded >= required) {
-          callback();
-        }
-      };
-  
-      this.preloadSprites(onAssetLoad);
-    },
-    preloadSprites(onAssetLoad) {
-      for (let key in this.sprites) {
-        this.sprites[key] = new Image();
-        this.sprites[key].src = 'img/' + key + '.png';
-        this.sprites[key].addEventListener('load', onAssetLoad);
-      }
-    },
-    initDimensions() {
-      let data = {
-        maxWidth: this.dimensions.max.width,
-        maxHeight: this.dimensions.max.height,
-        minWidth: this.dimensions.min.width,
-        minHeight: this.dimensions.min.height,
-        realWidth: window.innerWidth,
-        realHeight: window.innerHeight
-      };
-  
-      if (data.realWidth / data.realHeight > data.maxWidth / data.maxHeight) {
-        this.fitWidth(data);
-      } else {
-        this.fitHeight(data);
-      }
-  
-      this.canvas.width = this.width;
-      this.canvas.height = this.height;
-    },
-    fitWidth(data) {
-      this.height = Math.round(this.width * data.realHeight / data.realWidth);
-      this.height = Math.min(this.height, data.maxHeight);
-      this.height = Math.max(this.height, data.minHeight);
-      this.width = Math.round(data.realWidth * this.height / data.realHeight);
-      this.canvas.style.height = '100%';
-    },
-    fitHeight(data) {
-      this.width = Math.round(data.realWidth * data.maxHeight / data.realHeight);
-      this.width = Math.min(this.width, data.maxWidth);
-      this.width = Math.max(this.width, data.minWidth);
-      this.height = Math.round(this.width * data.realHeight / data.realWidth);
-      this.canvas.style.height = '100%';
-    },
-    run() {
-      // запуск игры
-      console.log('запуск игры');
-      this.create();
-  
-      this.gameInterval = setInterval(() => {
-        this.update();
-      }, 150);
-  
-      
-    },
-    create() {
-      // создаём элементы - работа с данными
-      this.barriers.create();
-      this.airplane.create();
-      
-  
-      // установить игровые события
-      window.addEventListener('keydown', (event) => {
-        this.airplane.start(event.keyCode);
-      });
-    },
-    update() {
-      this.airplane.move();
-      this.render();
-    },
-    render() {
-      // отрисовка элементов на canvas
-      window.requestAnimationFrame(() => {
-        this.ctx.clearRect(0, 0, this.width, this.height);
-        this.ctx.drawImage(this.sprites.background, 0, 0);
-        this.barriers.render();
-        this.airplane.render();
-        this.ctx.fillText('Score: ' + this.score, 30, 30);
-      });
-    },
-    stop() {
-      clearInterval(this.gameInterval);
-      
-      alert('Игра завершена');
-      window.location.reload();
-    },
+'use strict';
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = 600;
+canvas.height = 400;
+
+let spasePressed = false;
+let angle = 0;
+let hue = 20;
+let frame = 0;
+let score = 0;
+let gamespeed = 2;
+
+const background = new Image();
+background.src = 'img/background.png';
+const BG = {
+    x1: 0,
+    x2: canvas.width,
+    y:0,
+    width: canvas.width,
+    height: canvas.height
+}
+function handleBackground(){
+    if (BG.x1 <= -BG.width + gamespeed) BG.x1 = BG.width;
+    else BG.x1 -= gamespeed;
+    if (BG.x2 <= -BG.width + gamespeed) BG.x2 = BG.width;
+    else BG.x2 -= gamespeed;
+    ctx.drawImage(background, BG.x1, BG.y, BG.width, BG.height);
+    ctx.drawImage(background, BG.x2, BG.y, BG.width, BG.height);
+
+}
+
+function animate(){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    //ctx.fillRect(10, 10, 50, 50);
+    handleBackground();
+    handleObstacles();
+    handleParticles();
+    bird.update();
+    bird.draw();
+    ctx.fillStyle = 'red';
+    ctx.font = '90px Georgia';
+    ctx.strokeText(score, 450, 70);
+    ctx.fillText(score, 450, 70);
+    handleCollisions();
+    if (handleCollisions()) return;    
     
-  };
-  
-  window.addEventListener('load', () => {
-    game.start();
-  });
+    requestAnimationFrame(animate);
+    angle += 1.12;
+    hue++;
+    if(hue >= 60) hue = 20;
+    frame++;
+}
+animate();
+
+window.addEventListener('keydown', function(e){
+     if(e.code === 'Space') spasePressed = true;
+});
+window.addEventListener('keyup', function(e){
+    if(e.code === 'Space') spasePressed = false;
+});
+
+const bang = new Image();
+bang.src = 'img/bang.png';
+function handleCollisions(){
+    for (let i = 0; i < obstaclesArray.length; i++){
+        if (bird.x < obstaclesArray[i].x + obstaclesArray[i].width 
+            && bird.x + bird.width > obstaclesArray[i].x 
+            && ((bird.y < 0 + obstaclesArray[i].top 
+                && bird.y + bird.height > 0) 
+                || (bird.y > canvas.height - obstaclesArray[i].bottom 
+                    && bird.y + bird.height < canvas.height))){
+                        ctx.drawImage(bang, bird.x, bird.y, 50, 50);
+                        ctx.font = '25px Georgia';
+                        ctx.fillStyle = 'black';
+                        ctx.fillText('Game Over, your score is ' + score, 160, canvas.height/2 - 10);                        
+                        return true;
+                    }
+    }
+}
