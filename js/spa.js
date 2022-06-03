@@ -22,11 +22,12 @@ function SwitchToStateFromURLHash() {
             PageHTML += rules.render();
             break;
         case 'play':
+            PageHTML += header.render();
             PageHTML += game.render();
             break;
     }
     spa.innerHTML = PageHTML;
-    //document.getElementById('button_home').addEventListener('click', SwitchToMainPage);
+    document.getElementById('home').addEventListener('click', SwitchToMainPage);
     document.getElementById('play').addEventListener('click', SwitchToGamePage);
     document.getElementById('rules').addEventListener('click', SwitchToRulesPage);
 }
