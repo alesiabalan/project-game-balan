@@ -3,6 +3,7 @@ const header = {
         return `
         <header class="header">
             <h1 class="title">Flappy Plane<h1>
+            <input type="button" value="Home" class="menu_list_button" id="home">
            
         </header>
         `;

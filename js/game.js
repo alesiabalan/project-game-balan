@@ -10,7 +10,6 @@ let angle = 0;
 let hue = 20;
 let frame = 0;
 let score = 0;
-let bestScore = 0;
 let gamespeed = 2;
 
 const background = new Image();
@@ -46,13 +45,13 @@ function animate() {
   ctx.fillText(score, 450, 70);
   handleCollisions();
   if (handleCollisions()) return;
-
   requestAnimationFrame(animate);
   angle += 1.12;
   hue++;
   if (hue >= 60) hue = 20;
   frame++;
 }
+
 animate();
 
 window.addEventListener('keydown', function (e) {
@@ -60,6 +59,20 @@ window.addEventListener('keydown', function (e) {
 });
 window.addEventListener('keyup', function (e) {
   if (e.code === 'Space') spasePressed = false;
+});
+
+window.addEventListener('mousedown', function () {
+  spasePressed = true;
+});
+window.addEventListener('mouseup', function () {
+  spasePressed = false;
+});
+
+window.addEventListener('touchstart', function () {
+  spasePressed = true;
+});
+window.addEventListener('touchend', function () {
+  spasePressed = false;
 });
 
 const bang = new Image();

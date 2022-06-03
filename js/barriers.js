@@ -20,6 +20,7 @@ class Barrier {
             score++;
             this.counted = true;
         }
+        
         this.draw();
     }
 }
